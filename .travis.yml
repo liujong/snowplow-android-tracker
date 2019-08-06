@@ -53,7 +53,8 @@ script:
   - docker ps -a
   - echo $MICRO_SUBDOMAIN
   - ./ngrok http -authtoken $NGROK_AUTH -subdomain $MICRO_SUBDOMAIN -log=stdout 9090 > /dev/null &
-  - ./gradlew createDebugCoverageReport coveralls
+#  - ./gradlew createDebugCoverageReport coveralls
+  - ./gradlew snowplow-demo-app:connectedDebugAndroidTest
 
 deploy:
   skip_cleanup: true
