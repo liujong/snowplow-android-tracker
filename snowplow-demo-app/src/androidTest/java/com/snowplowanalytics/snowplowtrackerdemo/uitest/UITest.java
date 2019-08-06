@@ -1,21 +1,24 @@
 package com.snowplowanalytics.snowplowtrackerdemo.uitest;
 
-import android.content.Intent;
-import android.util.Log;
 import android.view.WindowManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
 
 import androidx.test.espresso.Espresso;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.snowplowanalytics.snowplowtrackerdemo.Demo;
 import com.snowplowanalytics.snowplowtrackerdemo.R;
 
@@ -34,11 +37,13 @@ import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withHint;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
+import static com.snowplowanalytics.snowplow.tracker.constants.TrackerConstants.SCHEMA_APPLICATION;
 import static com.snowplowanalytics.snowplowtrackerdemo.BuildConfig.MICRO_ENDPOINT;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(AndroidJUnit4.class)
 @LargeTest
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class UITest {
 
     private String micro_uri;
@@ -85,8 +90,7 @@ public class UITest {
     }
 
     @Test
-    public void sendDemoEvents() throws InterruptedException, IOException, JSONException {
-
+    public void t1_sendDemoEvents() throws InterruptedException, IOException, JSONException {
         client.newCall(resetRequest).execute();
 
         Espresso.closeSoftKeyboard();
@@ -106,8 +110,39 @@ public class UITest {
         Response response = client.newCall(request).execute();
         String body = response.body().string();
         JSONObject jsonObject = new JSONObject(body);
-        assertEquals(jsonObject.getString("total"), "16");
-        assertEquals(jsonObject.getString("good"), "16");
+        assertEquals(jsonObject.getString("total"), jsonObject.getString("good"));
         assertEquals(jsonObject.getString("bad"), "0");
     }
+
+//    @Test
+//    public void t2_checkApplicationContext() throws IOException {
+//        Request request = new Request.Builder()
+//                .url(micro_good_url)
+//                .build();
+//
+//        Response response = client.newCall(request).execute();
+//        String body = response.body().string();
+//        JsonArray jsonArray = new JsonParser().parse(body).getAsJsonArray();
+//
+//        for (int i = 0; i < jsonArray.size(); ++i) {
+//            JsonArray contexts = jsonArray
+//                                .get(i).getAsJsonObject()
+//                                .get("event").getAsJsonObject()
+//                                .get("parameters").getAsJsonObject()
+//                                .get("co").getAsJsonObject()
+//                                .get("data").getAsJsonArray();
+//
+//            for (int j = 0; j < contexts.size(); ++j) {
+//                JsonObject context = contexts.get(j).getAsJsonObject();
+//                String schema = context.get("schema").getAsString();
+//                JsonObject data = context.get("data").getAsJsonObject();
+//                if (schema.equals(SCHEMA_APPLICATION)) {
+//                    String build = data.get("build").getAsString();
+//                    String version = data.get("version").getAsString();
+//                    assertEquals(build, "3");
+//                    assertEquals(version, "0.3.0");
+//                }
+//            }
+//        }
+//    }
 }
